@@ -3,6 +3,8 @@ import {Express} from "express"
 import * as socketio from "socket.io"
 import {Server as HttpServer} from 'http'
 import UserManager from "./managers/UserManager";
+import RoomManager from "./managers/RoomManager";
+import {Events, SocketEvents} from "./enums";
 
 export default new class Server {
 
@@ -28,9 +30,14 @@ export default new class Server {
             }
         })
 
-        this.io.on("connect", socket => {
+        this.io.on(SocketEvents.Connect, socket => {
             UserManager.connect(socket)
-            socket.on('disconnect', () => {
+
+            socket.on(Events.RoomCreate, () => {
+                RoomManager.createRoom(socket)
+            })
+
+            socket.on(SocketEvents.Disconnect, () => {
                 UserManager.disconnect(socket)
             })
         })
