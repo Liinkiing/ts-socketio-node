@@ -1,4 +1,4 @@
-import {User} from "./models/User";
+import {User} from "./entities/User";
 
 type Some = { [key: string]: Some } | object | string | boolean | symbol | number | null;
 

@@ -1,5 +1,5 @@
-import {Room} from "../models/Room";
-import {User} from "../models/User";
+import {Room} from "../entities/Room";
+import {User} from "../entities/User";
 import {action, autorun, observable} from "mobx";
 import Logger from "../services/Logger";
 import {OnRoomJoined} from "../interfaces";
@@ -11,15 +11,23 @@ class RoomManager {
     constructor() {
         Logger.info('setup autorun for RoomManager')
         autorun(() => {
-            console.log(this.rooms)
+            console.log(this.rooms.map(r => r.serialize()))
         })
+    }
+
+    public exists = (room: Room): boolean => {
+        return !!this.rooms.find(r => r.id === room.id)
+    }
+
+    public find = (id: string): Room | undefined => {
+        return this.rooms.find(r => r.id === id)
     }
 
     @action public createRoom = (owner: User, onJoin?: OnRoomJoined): Room => {
         owner.leaveRoom()
         const room = new Room(owner);
-        room.addUser(owner, onJoin)
         this.rooms = [...this.rooms, room]
+
         return room
     }
 

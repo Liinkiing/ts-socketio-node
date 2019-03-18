@@ -1,4 +1,4 @@
-import {User} from "../models/User";
+import {User} from "../entities/User";
 import {Socket} from "socket.io";
 import Logger, {red} from "../services/Logger";
 import {action, observable} from "mobx";

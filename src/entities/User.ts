@@ -17,10 +17,26 @@ export class User implements Serializable {
         this.id = socket.id
     }
 
+    get io() {
+        return this.socket.server
+    }
+
     public leaveRoom = (): void => {
         if (this.room) {
             this.room.removeUser(this)
         }
+    }
+
+    public connectToRoom = (room: Room): void => {
+        if (!this.isInRoom(room)) {
+            room.addUser(this)
+        }
+    }
+
+    public isInRoom = (room: Room): boolean => {
+        return this.room ?
+            this.room.id === room.id :
+            false
     }
 
     public serialize = (): UserSerialized => {
