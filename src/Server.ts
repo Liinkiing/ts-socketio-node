@@ -5,6 +5,7 @@ import {Server as HttpServer} from 'http'
 import UserManager from "./managers/UserManager";
 import RoomManager from "./managers/RoomManager";
 import {Events, SocketEvents} from "./enums";
+import Logger, {red} from "./services/Logger";
 
 export default new class Server {
 
@@ -31,14 +32,16 @@ export default new class Server {
         })
 
         this.io.on(SocketEvents.Connect, socket => {
-            UserManager.connect(socket)
+            const user = UserManager.connect(socket)
 
             socket.on(Events.RoomCreate, () => {
-                RoomManager.createRoom(socket)
+                const room = RoomManager.createRoom(user, () => {
+                    socket.emit(Events.RoomJoined, room.serialize())
+                })
             })
 
             socket.on(SocketEvents.Disconnect, () => {
-                UserManager.disconnect(socket)
+                UserManager.disconnect(user)
             })
         })
 

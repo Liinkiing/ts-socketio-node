@@ -5,5 +5,6 @@ export enum SocketEvents {
 }
 
 export enum Events {
-    RoomCreate = "room:create"
+    RoomCreate = "room:create",
+    RoomJoined = "room:joined",
 }

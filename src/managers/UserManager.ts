@@ -1,19 +1,25 @@
 import {User} from "../models/User";
 import {Socket} from "socket.io";
 import Logger, {red} from "../services/Logger";
+import {action, observable} from "mobx";
 
-export default new class UserManager {
+class UserManager {
 
-    private users: User[] = []
+    @observable private users: User[] = []
 
-    public connect = (socket: Socket): void => {
+    @action public connect = (socket: Socket): User => {
         Logger.info(`socket with id ${red(socket.id)} has been connected`)
-        this.users = [...this.users, new User(socket)]
+        const user = new User(socket);
+        this.users = [...this.users, user]
+        return user
     }
 
-    public disconnect = (socket: Socket): void => {
-        Logger.info(`socket with id ${red(socket.id)} has been disconnected`)
-        this.users = this.users.filter(user => user.id !== socket.id)
+    @action public disconnect = (user: User): void => {
+        if (user.room) {
+            user.leaveRoom()
+        }
+        this.users = this.users.filter(u => u.id !== user.id)
+        Logger.info(`socket with id ${red(user.id)} has been disconnected`)
     }
 
     public find = (socket: Socket): User | undefined => {
@@ -21,3 +27,5 @@ export default new class UserManager {
     }
 
 }
+
+export default new UserManager()
