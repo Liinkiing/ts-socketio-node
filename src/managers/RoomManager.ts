@@ -16,6 +16,7 @@ class RoomManager {
     }
 
     @action public createRoom = (owner: User, onJoin?: OnRoomJoined): Room => {
+        owner.leaveRoom()
         const room = new Room(owner);
         room.addUser(owner, onJoin)
         this.rooms = [...this.rooms, room]
