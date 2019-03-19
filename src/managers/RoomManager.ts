@@ -1,8 +1,9 @@
-import {Room} from "../entities/Room";
+import {Room, RoomSerialized} from "../entities/Room";
 import {User} from "../entities/User";
-import {action, autorun, observable} from "mobx";
+import {action, autorun, computed, observable} from "mobx";
 import Logger from "../services/Logger";
 import {OnRoomJoined} from "../interfaces";
+import {Events} from "../enums";
 
 class RoomManager {
 
@@ -32,9 +33,14 @@ class RoomManager {
     }
 
     @action public deleteRoom = (room: Room): void => {
+        room.io.sockets.emit(Events.RoomDeleted, room.serialize())
         room.removeAllUsers()
         this.rooms = this.rooms.filter(r => r.id !== room.id)
         Logger.success(`deleted ${room.toString()}`)
+    }
+
+    @computed get serializedRooms(): RoomSerialized[] {
+        return this.rooms.map(room => room.serialize())
     }
 
 }

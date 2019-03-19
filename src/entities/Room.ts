@@ -22,7 +22,7 @@ export class Room implements Serializable {
         return `Room(id: ${red(this.id)})`
     }
 
-    constructor(owner: User) {
+    constructor(private readonly owner: User) {
         this.id = randomBytes(20).toString('hex')
 
         this.addUser(owner)
@@ -38,11 +38,16 @@ export class Room implements Serializable {
         })
     }
 
+    get io() {
+        return this.owner.socket.server
+    }
+
     @action public addUser = (user: User, onJoin?: OnRoomJoined): void => {
         user.room = this
         user.socket.leaveAll()
         user.socket.join(this.id, () => {
             user.io.sockets.in(this.id).emit(Events.RoomJoined, this.serialize())
+            user.io.sockets.emit(Events.RoomRefresh, RoomManager.serializedRooms)
             Logger.success(`${user.toString()} joined ${this.toString()}`)
             if (onJoin) onJoin(user)
         })
@@ -51,10 +56,12 @@ export class Room implements Serializable {
 
     @action public removeUser = (user: User): void => {
         user.room = null
-        user.socket.leaveAll()
-        user.io.sockets.in(this.id).emit(Events.RoomLeft, {room: this.serialize(), user: user.serialize()})
-        Logger.info(`${user.toString()} left ${this.toString()}`)
-        this.users = this.users.filter(u => u.id !== user.id)
+        user.socket.leave(this.id, () => {
+            user.io.sockets.in(this.id).emit(Events.RoomLeft, {room: this.serialize(), user: user.serialize()})
+            this.users = this.users.filter(u => u.id !== user.id)
+            user.io.sockets.emit(Events.RoomRefresh, RoomManager.serializedRooms)
+            Logger.info(`${user.toString()} left ${this.toString()}`)
+        })
     }
 
     @action public removeAllUsers = (): void => {

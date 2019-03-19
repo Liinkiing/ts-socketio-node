@@ -28,6 +28,10 @@ class SocketRoom {
                 room.removeUser(user)
             }
         })
+
+        socket.on(Events.RoomRetrieve, () => {
+            socket.emit(Events.RoomRefresh, RoomManager.serializedRooms)
+        })
     }
 
 }
