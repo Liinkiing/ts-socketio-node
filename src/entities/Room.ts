@@ -60,8 +60,8 @@ export class Room implements Serializable {
             user.io.sockets.in(this.id).emit(Events.RoomLeft, {room: this.serialize(), user: user.serialize()})
             this.users = this.users.filter(u => u.id !== user.id)
             user.io.sockets.emit(Events.RoomRefresh, RoomManager.serializedRooms)
-            Logger.info(`${user.toString()} left ${this.toString()}`)
         })
+        Logger.info(`${user.toString()} left ${this.toString()}`)
     }
 
     @action public removeAllUsers = (): void => {

@@ -8,6 +8,8 @@ class SocketRoom {
     public static handle = (socket: SocketIO.Socket) => {
         const user = UserManager.find(socket)
 
+        socket.emit(Events.RoomRefresh, RoomManager.serializedRooms)
+
         socket.on(Events.RoomVerify, (id: string) => {
             const room = RoomManager.find(id)
             if (room) {
